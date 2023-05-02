@@ -10,6 +10,7 @@ import UIKit
 class CardView: UIView {
     
     fileprivate let cardImage = UIImageView(image: UIImage(named: "lady"))
+    fileprivate let threshold : CGFloat = 100
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -34,14 +35,12 @@ class CardView: UIView {
         
         // translation değişkeniyle ekranda dokunduğum konumun yerini x, y olarak tutabiliyorum.
         // self.transform ile de gester ı eklediğim view un konumunu değiştirebiliyorum
-        let translation = gesture.translation(in: nil)
-        self.transform = CGAffineTransform(translationX: translation.x, y: translation.y)
         
         switch gesture.state{
         case .changed:
             handleChanged(gesture)
         case .ended:
-            handleEnded()
+            handleEnded(gesture)
         default:
             break
         }
@@ -50,16 +49,51 @@ class CardView: UIView {
     
     // gester ın kendisini nasıl para olarak oldığını anlayamadım.
     fileprivate func handleChanged(_ gesture: UIPanGestureRecognizer) {
+        
         let translation = gesture.translation(in: nil)
-        self.transform = CGAffineTransform(translationX: translation.x, y: translation.y)
+        let degree : CGFloat = translation.x / 25
+        let angle = degree * .pi / 180
+        
+        // CGAffineTransform class ı 2D hareketler yapmama olanak tanıyan bir class mış.
+        let rotationalTransformation = CGAffineTransform(rotationAngle: angle)
+        self.transform = rotationalTransformation.translatedBy(x: translation.x, y: translation.y)  // transladedby kısmı ile dönen view umu bir de yatayda hareket ettirebildim.
+        
+        //let translation = gesture.translation(in: nil)
+        //self.transform = CGAffineTransform(translationX: translation.x, y: translation.y)
     }
     
-    fileprivate func handleEnded(){
+    fileprivate func handleEnded(_ gesture: UIPanGestureRecognizer){
+        let photoLiked = gesture.translation(in: nil).x > threshold  // eğer swap yeterince istekliyse trueatanır.
+        let photoDoesntLiked = gesture.translation(in: nil).x < (-1 * threshold)
+        
         // bu animate.. methoduyla bazı bouncing özelliklerini ayarlayabiliyorsun.
-        UIView.animate(withDuration: 0.70, delay: 0, usingSpringWithDamping: 0.6, initialSpringVelocity: 0.1) {
+        UIView.animate(withDuration: 0.70, delay: 0, usingSpringWithDamping: 0.6, initialSpringVelocity: 0.1, options: .curveEaseOut) {
             // ended olduğunda belirtilen timing özellikleriyle bu action gerçekleşecek.
+            
+            if photoLiked{
+                
+                // like swap
+                let offScreenTransform = self.transform.translatedBy(x: 500, y: 0)
+                self.transform = offScreenTransform
+                
+            }else if photoDoesntLiked{
+                
+                // does not like swap
+                let offScreenTransform = self.transform.translatedBy(x: -500, y: 0)
+                self.transform = offScreenTransform
+                
+            }
+            else{
+                self.transform = .identity
+            }
+            
+            
+        } completion: { _ in
+            // bu blok swap işleminden sonra olacakları içerecektir.
             self.transform = .identity
         }
+
+        
     }
     
     required init?(coder: NSCoder) {
