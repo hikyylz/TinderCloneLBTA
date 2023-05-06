@@ -11,8 +11,10 @@ class CardView: UIView {
     
     fileprivate let infoLabel = UILabel()
     fileprivate let cardImage = UIImageView(image: UIImage(named: "lady1"))
-    fileprivate let threshold : CGFloat = 100
+    fileprivate let threshold : CGFloat = 150
+    fileprivate var imageIndex = 0
     fileprivate let gradientLayer = CAGradientLayer()
+    fileprivate let barsStackView = UIStackView()
     
     // bu değişken..
     var cardViewModel : CardViewModel!{
@@ -21,6 +23,14 @@ class CardView: UIView {
             cardImage.image = UIImage(named: imageName)
             infoLabel.attributedText = cardViewModel.attributedString
             infoLabel.textAlignment = cardViewModel.textAlligment
+            
+            (0..<cardViewModel.imageNames.count).forEach { _ in
+                let barView = UIView()
+                barView.backgroundColor = UIColor.gray
+                barsStackView.addArrangedSubview(barView)
+            }
+            
+            barsStackView.arrangedSubviews.first?.backgroundColor = .white
         }
     }
     
@@ -28,9 +38,11 @@ class CardView: UIView {
         super.init(frame: frame)
         
         setUpLayout()
-        let pangester = UIPanGestureRecognizer(target: self, action: #selector(handlePan))
-        addGestureRecognizer(pangester)
+        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePan))
+        addGestureRecognizer(panGesture)
         
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
+        addGestureRecognizer(tapGesture)
     }
     
     fileprivate func setUpLayout() {
@@ -40,6 +52,7 @@ class CardView: UIView {
         addSubview(cardImage)
         cardImage.fillSuperview()
         
+        setUpBarsStackView()
         setUpGradientLayout()
         
         addSubview(infoLabel)
@@ -49,6 +62,19 @@ class CardView: UIView {
         // view umda göstereceğim yazıların özelliklerini buradan ayarlıyorum.
         infoLabel.anchor(top: nil, leading: leadingAnchor, bottom: bottomAnchor, trailing: trailingAnchor, padding: .init(top: 0, left: 16, bottom: 16, right: 16))
     }
+    
+    fileprivate func setUpBarsStackView(){
+        addSubview(barsStackView)
+        barsStackView.anchor(top: topAnchor, leading: leadingAnchor, bottom: nil, trailing: trailingAnchor, padding: .init(top: 8, left: 8, bottom: 0, right: 8), size: .init(width: 0, height: 3))
+        
+        // vu StrackView içerisine ekleyeceğim subView ların aralarındaki boşluğu bununla ayarlamam gerekmekte.
+        barsStackView.spacing = 4
+        barsStackView.distribution = .fillEqually
+        
+    }
+    
+    
+    
     
     fileprivate func setUpGradientLayout(){
         // how we can draw a gradient with swift
@@ -61,6 +87,23 @@ class CardView: UIView {
     override func layoutSubviews() {
         // ekrandaki her alt görsel kendini oluştururken çağırılab nir mtehodmuş bu.
         gradientLayer.frame = self.frame
+    }
+    
+    @objc fileprivate func handleTap(gesture: UITapGestureRecognizer){
+        barsStackView.arrangedSubviews[imageIndex].backgroundColor = .gray
+        let location = gesture.location(in: nil)
+        let nextPhoto = location.x > frame.width/2 ? true : false
+        
+        // sağ a veya sol a tıklamama göre hareket etmek istediğim yönü belirliyorum.
+        if nextPhoto{
+            imageIndex = min(imageIndex+1, cardViewModel.imageNames.count-1)
+        }else{
+            imageIndex = max(imageIndex-1, 0)
+        }
+        
+        let currentImageView = cardViewModel.imageNames[imageIndex]
+        cardImage.image = UIImage(named: currentImageView)
+        barsStackView.arrangedSubviews[imageIndex].backgroundColor = .white
     }
     
     @objc fileprivate func handlePan(gesture: UIPanGestureRecognizer){
@@ -95,7 +138,7 @@ class CardView: UIView {
     }
     
     fileprivate func handleEnded(_ gesture: UIPanGestureRecognizer){
-        let photoLiked = gesture.translation(in: nil).x > threshold  // eğer swap yeterince istekliyse trueatanır.
+        let photoLiked = gesture.translation(in: nil).x > threshold  // eğer swap yeterince istekliyse true atanır.
         let photoDoesntLiked = gesture.translation(in: nil).x < (-1 * threshold)
         
         // bu animate.. methoduyla bazı bouncing özelliklerini ayarlayabiliyorsun.
@@ -118,8 +161,8 @@ class CardView: UIView {
             }
         } completion: { _ in
             // bu blok swap işleminden sonra olacakları içerecektir.
-            self.transform = .identity
-            self.removeFromSuperview()   // insanları swap yaptıkdan sonra diğer kişiye geçebilmem için ortadan kaybolması lazım.
+            //self.transform = .identity
+            //self.removeFromSuperview()   // insanları swap yaptıkdan sonra diğer kişiye geçebilmem için ortadan kaybolması lazım.
         }
     }
     

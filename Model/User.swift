@@ -15,7 +15,7 @@ struct User : ProducesCardViewModel{
     let name : String
     let age : Int
     let profession : String
-    let imageName : String
+    let imageNames : [String]
     
     
     // bir user ı cardViewModel de kullanabilmek adın var bu method.
@@ -25,6 +25,6 @@ struct User : ProducesCardViewModel{
         attributedText.append(NSAttributedString(string:" \(age)", attributes: [.font: UIFont.systemFont (ofSize: 24, weight: .regular) ]))
         attributedText.append (NSAttributedString(string: "\n  \(profession)", attributes: [.font: UIFont.systemFont (ofSize: 20, weight: .regular)]))
         
-        return CardViewModel(imageNames: [imageName], attributedString: attributedText, textAlligment: .left)
+        return CardViewModel(imageNames: imageNames, attributedString: attributedText, textAlligment: .left)
     }
 }

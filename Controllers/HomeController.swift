@@ -17,9 +17,9 @@ class HomeController: UIViewController {
     // burda gösterebileceğim her şey ProducesCardViewModel ine uymak zorunda.
     let cardViewModels : [CardViewModel] = {
        let producers = [
-        User(name: "Jane", age: 18, profession: "Teacher", imageName: "lady2"),
-        User(name: "Kenny", age: 23, profession: "music DJ", imageName: "lady1"),
-        Advertiser(title: "Slide Out menu feature", bradnName: "LBTA", posterPhotoName: "slide_out_menu_poster")
+        User(name: "Jane", age: 18, profession: "Teacher", imageNames: ["kelly1" , "kelly2"]),
+        User(name: "Kenny", age: 23, profession: "music DJ", imageNames: ["jane1" , "jane2" , "jane3"]),
+        Advertiser(title: "Slide Out menu feature", bradnName: "LBTA", posterPhotoName: ["slide_out_menu_poster"])
         
        ] as [ProducesCardViewModel]
                                         
