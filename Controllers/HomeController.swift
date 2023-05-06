@@ -7,11 +7,25 @@
 
 import UIKit
 
-class ViewController: UIViewController {
+class HomeController: UIViewController {
 
     let topStackView = TopNavigationStackView()
     let cardsDeckView = UIView()
     let BottomSubviews = HomeButtonControlStackView()
+    
+    // ekranda ortada gözükmesini istediğim her şeyin tanımlandığı yer burasıdır.
+    // burda gösterebileceğim her şey ProducesCardViewModel ine uymak zorunda.
+    let cardViewModels : [CardViewModel] = {
+       let producers = [
+        User(name: "Jane", age: 18, profession: "Teacher", imageName: "lady2"),
+        User(name: "Kenny", age: 23, profession: "music DJ", imageName: "lady1"),
+        Advertiser(title: "Slide Out menu feature", bradnName: "LBTA", posterPhotoName: "slide_out_menu_poster")
+        
+       ] as [ProducesCardViewModel]
+                                        
+        let viewModels = producers.map({ return $0.toCardViewModel() })
+        return viewModels
+    }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -22,9 +36,18 @@ class ViewController: UIViewController {
     }
     
     fileprivate func setupdummyCards(){
-        let cardView = CardView(frame: .zero)
-        cardsDeckView.addSubview(cardView)
-        cardView.fillSuperview()
+        cardViewModels.forEach { cardVM in
+            // cardView taslağı oluştur..
+            let cardView = CardView(frame: .zero)
+            
+            // taslağa değerler yerleştir..
+            cardView.cardViewModel = cardVM
+            
+            // oluşturulan view u ekranda gözükecek viewun içine yerleştirelim.
+            self.cardsDeckView.addSubview(cardView)
+            cardView.fillSuperview()
+        }
+        
     }
     
     
