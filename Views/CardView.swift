@@ -31,6 +31,7 @@ class CardView: UIView {
             }
             
             barsStackView.arrangedSubviews.first?.backgroundColor = .white
+            setUpImageIndexObserver()
         }
     }
     
@@ -43,6 +44,17 @@ class CardView: UIView {
         
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
         addGestureRecognizer(tapGesture)
+    }
+    
+    fileprivate func setUpImageIndexObserver(){
+        // imageIndexObserver işte burada initalize edilecek çünkü view larla etkileşime gireceksem bu class ın içerinde olmalıdır.
+        cardViewModel.imageIndexObserver = { (imageIndx, image) in
+            self.barsStackView.arrangedSubviews.forEach { view in
+                view.backgroundColor = .gray
+            }
+            self.cardImage.image = image
+            self.barsStackView.arrangedSubviews[imageIndx].backgroundColor = .white
+        }
     }
     
     fileprivate func setUpLayout() {
@@ -73,9 +85,6 @@ class CardView: UIView {
         
     }
     
-    
-    
-    
     fileprivate func setUpGradientLayout(){
         // how we can draw a gradient with swift
         gradientLayer.colors = [UIColor.clear.cgColor, UIColor.black.cgColor]
@@ -90,20 +99,13 @@ class CardView: UIView {
     }
     
     @objc fileprivate func handleTap(gesture: UITapGestureRecognizer){
-        barsStackView.arrangedSubviews[imageIndex].backgroundColor = .gray
         let location = gesture.location(in: nil)
         let nextPhoto = location.x > frame.width/2 ? true : false
-        
-        // sağ a veya sol a tıklamama göre hareket etmek istediğim yönü belirliyorum.
         if nextPhoto{
-            imageIndex = min(imageIndex+1, cardViewModel.imageNames.count-1)
+            cardViewModel.advanceToNextPhoto()
         }else{
-            imageIndex = max(imageIndex-1, 0)
+            cardViewModel.goTopreviousPhoto()
         }
-        
-        let currentImageView = cardViewModel.imageNames[imageIndex]
-        cardImage.image = UIImage(named: currentImageView)
-        barsStackView.arrangedSubviews[imageIndex].backgroundColor = .white
     }
     
     @objc fileprivate func handlePan(gesture: UIPanGestureRecognizer){
