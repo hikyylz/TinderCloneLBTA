@@ -32,6 +32,8 @@ class CustomTextField : UITextField{
         // editlediğin textRect i bu methodla gösterebiliyormuşsun.
         return bounds.insetBy(dx: padding, dy: 0)
     }
+    
+    
     override var intrinsicContentSize: CGSize{
         return .init(width: 0, height: 50)
     }
