@@ -7,6 +7,7 @@
 
 import UIKit
 import FirebaseAuth
+import FirebaseStorage
 import JGProgressHUD
 
 // extansion şeklinde yazmak bu şeyleri okunurluğu arttırıyor.
@@ -27,6 +28,7 @@ extension RegisterationViewController: UIImagePickerControllerDelegate, UINaviga
 class RegisterationViewController: UIViewController {
     fileprivate let gradiantLayer = CAGradientLayer()
     fileprivate let registrationVM = RegisterationViewModel()
+    fileprivate var registeringHUD = JGProgressHUD(style: .dark)
     
     // lazy ön ekiyle tanımlanmış olan bu variable, kodumda ona ihtiyacım olduğunda kimlik kazanacak. onu kullanmadığım sürece nil olarak duran bir şey sadece. Koduma hız katan bir özellik bu.
     lazy var overallStackView = UIStackView(arrangedSubviews: [
@@ -119,22 +121,17 @@ class RegisterationViewController: UIViewController {
     
     @objc fileprivate func handleRegister(){
         self.dismissKeyboard()
-        guard let email = emailTextField.text else{return}
-        guard let password = paswordTextField.text else{return}
-        
-        Auth.auth().createUser(withEmail: email, password: password) { AuthResponse, error in
-            if let err = error{
-                // user oluşturulamadı.
-                self.showHUDwithErr(err)
+        registrationVM.performRegister { [weak self] err in
+            if let err = err{
+                self?.showHUDwithErr(err)
                 return
             }
-            
-            // user oluştu
-            print("user created, uid: \(AuthResponse?.user.uid ?? ":-:")")
+            // registering done.
         }
     }
     
     fileprivate func showHUDwithErr(_ err: Error){
+        registeringHUD.dismiss()
         // üç sn ekranımda gözükecek bir progress kutucuğu..
         let hud = JGProgressHUD(style: .dark)
         hud.textLabel.text = "Failed registering"
@@ -167,6 +164,15 @@ class RegisterationViewController: UIViewController {
         }
         
         registrationVM.bindableImage.bind { [unowned self] img in self.selectPhotoButton.setImage(img?.withRenderingMode(.alwaysOriginal), for: .normal)
+        }
+        
+        registrationVM.bindableIsRegistering.bind { [unowned self] isRegistering in
+            if isRegistering == true{
+                registeringHUD.textLabel.text = "Register"
+                registeringHUD.show(in: self.view)
+            }else{
+                self.registeringHUD.dismiss()
+            }
         }
         
         
