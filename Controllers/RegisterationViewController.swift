@@ -6,11 +6,29 @@
 //
 
 import UIKit
+import FirebaseAuth
+import JGProgressHUD
+
+// extansion şeklinde yazmak bu şeyleri okunurluğu arttırıyor.
+extension RegisterationViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+    
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        if let image = info[.originalImage] as? UIImage{
+            registrationVM.bindableImage.value = image
+        }
+        dismiss(animated: true)
+    }
+    
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        dismiss(animated: true)
+    }
+}
 
 class RegisterationViewController: UIViewController {
     fileprivate let gradiantLayer = CAGradientLayer()
+    fileprivate let registrationVM = RegisterationViewModel()
     
-    // lazy ön ekiyle tanımlanmış olan buı variable, kodumda ona ihtiyacım olduğunda kimlik kazanacak. onu kullanmadığım sürece nil olarak duran bir şey sadece. Koduma hız katan bir özellik bu.
+    // lazy ön ekiyle tanımlanmış olan bu variable, kodumda ona ihtiyacım olduğunda kimlik kazanacak. onu kullanmadığım sürece nil olarak duran bir şey sadece. Koduma hız katan bir özellik bu.
     lazy var overallStackView = UIStackView(arrangedSubviews: [
         selectPhotoButton,
         horizontalView
@@ -37,30 +55,39 @@ class RegisterationViewController: UIViewController {
         button.setTitleColor(.black, for: .normal)
         button.backgroundColor = .white
         button.titleLabel?.font = UIFont.systemFont(ofSize: 30, weight: .bold)
-        button.heightAnchor.constraint(equalToConstant: 275).isActive = true
+        button.heightAnchor.constraint(equalToConstant: 345).isActive = true
         button.layer.cornerRadius = 15
+        button.addTarget(self, action: #selector(handleSelectPhoto), for: .touchUpInside)
+        button.imageView?.contentMode = .scaleAspectFill  // photo sadece çerçeveye sığsın esnemeden.
+        button.clipsToBounds = true  // subView ların bunun çerçevesine tam oturmasını sağlayan bir değişkenmiş bu !
         return button
     }()
     let registerButton : UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Register", for: .normal)
         button.setTitleColor(.white, for: .normal)
-        button.backgroundColor = .black
+        button.backgroundColor = .lightGray
+        button.setTitleColor(.gray, for: .disabled)
+        button.isEnabled = false
         button.titleLabel?.font = UIFont.systemFont(ofSize: 20, weight: .bold)
         button.layer.cornerRadius = 25
+        button.addTarget(self, action: #selector(handleRegister), for: .touchUpInside)
         return button
     }()
     let fullNameTextField : CustomTextField = {
         let TF = CustomTextField(padding: 16)
         TF.placeholder = "Enter full name"
         TF.backgroundColor = .white
+        TF.addTarget(self, action: #selector(handleTextChange), for: .editingChanged)
         return TF
     }()
     let paswordTextField : CustomTextField = {
         let TF = CustomTextField(padding: 16)
         TF.placeholder = "Enter pasword"
         TF.isSecureTextEntry = true       // yazının gizli yazılmasını sağlayacak bir özellik bu.
+        /// similatör de hardware keyboard ile bu güvenlik özelliği sıkıntı yaşıyorlar !
         TF.backgroundColor = .white
+        TF.addTarget(self, action: #selector(handleTextChange), for: .editingChanged)
         return TF
     }()
     let emailTextField : CustomTextField = {
@@ -68,8 +95,10 @@ class RegisterationViewController: UIViewController {
         TF.placeholder = "Enter email"
         TF.keyboardType = .emailAddress   // klavyede @ sembolünü görmeye yarayacak bu satır.
         TF.backgroundColor = .white
+        TF.addTarget(self, action: #selector(handleTextChange), for: .editingChanged)
         return TF
     }()
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -78,6 +107,69 @@ class RegisterationViewController: UIViewController {
         setUpOverallStackView()
         setUpNotificationObserver()
         setUpTapGestureForDismissingKeyboard()
+        setupRegisterationViewModelObserver()
+    }
+    
+    @objc fileprivate func handleSelectPhoto(){
+        let imagePC = UIImagePickerController()
+        imagePC.modalPresentationStyle = .fullScreen   // chatgpt e kurban olayım :)
+        imagePC.delegate = self
+        present(imagePC, animated: true)
+    }
+    
+    @objc fileprivate func handleRegister(){
+        self.dismissKeyboard()
+        guard let email = emailTextField.text else{return}
+        guard let password = paswordTextField.text else{return}
+        
+        Auth.auth().createUser(withEmail: email, password: password) { AuthResponse, error in
+            if let err = error{
+                // user oluşturulamadı.
+                self.showHUDwithErr(err)
+                return
+            }
+            
+            // user oluştu
+            print("user created, uid: \(AuthResponse?.user.uid ?? ":-:")")
+        }
+    }
+    
+    fileprivate func showHUDwithErr(_ err: Error){
+        // üç sn ekranımda gözükecek bir progress kutucuğu..
+        let hud = JGProgressHUD(style: .dark)
+        hud.textLabel.text = "Failed registering"
+        hud.detailTextLabel.text = err.localizedDescription
+        hud.show(in: self.view)
+        hud.dismiss(afterDelay: 2)
+    }
+    
+    @objc fileprivate func handleTextChange(TF: CustomTextField){
+        if TF == fullNameTextField{
+            registrationVM.fullName = TF.text
+        }else if TF == emailTextField{
+            registrationVM.email = TF.text
+        }else if TF == paswordTextField{
+            registrationVM.password = TF.text
+        }
+    }
+    
+    
+    fileprivate func setupRegisterationViewModelObserver(){
+        // Bindable yapısını kullandım alttaki iki closure da.
+        
+        // .bind diyerek tanımlaman gereken closure a isim vermeden o closure u tanımlamış oluyorsun.
+        // değer bindable class ındaki value a atanıyor, o da kendi closure atamasına bağlı ancak closure tanımı burda senin elinde.
+        registrationVM.bindableIsFormValid.bind { [unowned self] isFormValid in
+            guard let isFormValid = isFormValid else { return }
+            self.registerButton.isEnabled = isFormValid
+            self.registerButton.backgroundColor = isFormValid ? .black : .lightGray
+            self.registerButton.setTitleColor(isFormValid ? .white : .gray, for: .normal)
+        }
+        
+        registrationVM.bindableImage.bind { [unowned self] img in self.selectPhotoButton.setImage(img?.withRenderingMode(.alwaysOriginal), for: .normal)
+        }
+        
+        
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -114,10 +206,10 @@ class RegisterationViewController: UIViewController {
     }
     
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        // ıos interface enviroment change ini anlayabilen bir yapıymış bu.
+        // ios interface enviroment change ini anlayabilen bir yapıymış bu.
         super.traitCollectionDidChange(previousTraitCollection)
         
-        // landScape pozisyonunda ekranda farklı şeyler gözüksün istiyorsam bu blak devreye girecek.
+        // landScape pozisyonunda ekranda farklı şeyler gözüksün istiyorsam bu blok devreye girecek.
         if self.traitCollection.verticalSizeClass == .compact{
             overallStackView.axis = .horizontal
         }else{

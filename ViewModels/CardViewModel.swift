@@ -26,7 +26,7 @@ class CardViewModel{
         }
     }
     
-    /// reactive programing örneğiymiş bu değişken.
+    /// reactive programing örneğiymiş bu closure.
     // bu closure yapısını burada init edileceğini söylüyorum.
     // init edilmesi view class larından birinde olacak çünkü, view ile etkileşime girmek View class ının logic kontrol ve işlemler operasyonlar ViewModel class larının işidir.
     var imageIndexObserver : ((Int, UIImage) -> ())?
