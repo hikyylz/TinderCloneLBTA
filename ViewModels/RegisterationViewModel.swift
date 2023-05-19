@@ -6,8 +6,8 @@
 //
 
 import UIKit
-import FirebaseAuth
 import FirebaseStorage
+import Firebase
 
 class RegisterationViewModel{
     
@@ -48,30 +48,48 @@ class RegisterationViewModel{
                 return
             }
             // user oluştu
-            // belirttiğim path ile bir folder oluştuacağım firebaseStorage üzerinde ve app deki tüm image leri orada tutacağım.
-            // yeni bir user yaratılırken imageFolder ı da oluşturuluyor.
-            let filename = UUID().uuidString
-            let ref = Storage.storage().reference(withPath: "/images/\(filename)")
-            let imageData = self.bindableImage.value?.jpegData(compressionQuality: 0.5) ?? Data()
-            
-            ref.putData(imageData) { _, err in
-                if let err = err {
-                    // user ın image ı kaydedilemedi..
+            self.saveImageToFirebase(completion: completion)  // completion ları böyle yazabildiğimi bilmiyordum.
+        }
+    }
+    
+    
+    fileprivate func saveImageToFirebase(completion: @escaping(Error?) -> ()){
+        // belirttiğim path ile bir folder oluştuacağım firebaseStorage üzerinde ve app deki tüm image leri orada tutacağım.
+        // yeni bir user yaratılırken imageFolder ı da oluşturuluyor.
+        let filename = UUID().uuidString
+        let ref = Storage.storage().reference(withPath: "/images/\(filename)")
+        let imageData = self.bindableImage.value?.jpegData(compressionQuality: 0.5) ?? Data()
+        
+        ref.putData(imageData, metadata: nil) { _, err in
+            if let err = err {
+                // user ın image ı kaydedilemedi..
+                completion(err)
+                return
+            }
+            // imageFolder a photo yüklendi
+            ref.downloadURL { URL, err in
+                if let err = err{
+                    // yüklenen image in URL sini indiremedim..
                     completion(err)
                     return
                 }
-                // imageFolder a photo yüklendi
-                ref.downloadURL { URL, err in
-                    if let err = err{
-                        // yüklenen image in URL sini indiremedim..
-                        completion(err)
-                        return
-                    }
-                    self.bindableIsRegistering.value = false  // registering işlemi bittikten sonsa hud i dissmis eden kodu çalıştırmak için bunu atamam lazım.
-                    // URL yi firestore a kaydetmek için fetch ledim burada..
-                    
-                }
+                self.bindableIsRegistering.value = false  // registering işlemi bittikten sonsa hud i dissmis eden kodu çalıştırmak için bunu atamam lazım.
+                // URL yi firestore a kaydetmek için fetch ledim burada..
+                self.saveInfoToFirestore(imageURL: URL?.absoluteString, completion: completion)
             }
+        }
+    }
+    
+    fileprivate func saveInfoToFirestore(imageURL: String?, completion: @escaping(Error?) -> ()){
+        guard let URL = imageURL else{ return }
+        let uid = Auth.auth().currentUser?.uid ?? ""
+        let docData = ["fullname" : fullName ?? "", "uid" : uid, "imageURL" : URL] as [String : Any]
+        Firestore.firestore().collection("users").document(uid).setData(docData) { err in
+            if let err = err{
+                completion(err)
+                return
+            }
+            completion(nil)
         }
     }
     

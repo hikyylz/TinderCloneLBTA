@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Firebase
 
 class HomeController: UIViewController {
 
@@ -13,27 +14,40 @@ class HomeController: UIViewController {
     let cardsDeckView = UIView()
     let BottomSubviews = HomeButtonControlStackView()
     
-    // ekranda ortada gözükmesini istediğim her şeyin tanımlandığı yer burasıdır.
+    // ekranda gözükmesini istediğim her şeyin tanımlandığı yer burasıdır.
     // burda gösterebileceğim her şey ProducesCardViewModel ine uymak zorunda.
-    let cardViewModels : [CardViewModel] = {
-       let producers = [
-        User(name: "Jane", age: 18, profession: "Teacher", imageNames: ["kelly1" , "kelly2"]),
-        User(name: "Kenny", age: 23, profession: "music DJ", imageNames: ["jane1" , "jane2" , "jane3"]),
-        Advertiser(title: "Slide Out menu feature", bradnName: "LBTA", posterPhotoName: ["slide_out_menu_poster"])
-        
-       ] as [ProducesCardViewModel]
-                                        
-        let viewModels = producers.map({ return $0.toCardViewModel() })
-        return viewModels
-    }()
-    
+    var cardViewModels = [CardViewModel]()
+
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        self.view.backgroundColor = .white
         topStackView.settingsButton.addTarget(self, action: #selector(handleSettings), for: .touchUpInside)
         setupLayout()
-        setupdummyCards()
         
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        fetchUsersFromFirebase()
+    }
+    
+    fileprivate func fetchUsersFromFirebase(){
+        
+        // bu işlemler async await işlemler.. dikkatli ol neyi ne sırayla yaptığına.
+        Firestore.firestore().collection("users").getDocuments { snapShot, err in
+            if let _ = err{
+                // failed fetching user from firebase.
+                return
+            }
+            
+            guard let snapShot = snapShot else {return}
+            snapShot.documents.forEach({ documentSnapShot in
+                let userDictionary = documentSnapShot.data()
+                let fetchedUser = User(dictionary: userDictionary)
+                self.cardViewModels.append(fetchedUser.toCardViewModel())
+            })
+            self.setupdummyCards()
+        }
     }
     
     @objc fileprivate func handleSettings(){

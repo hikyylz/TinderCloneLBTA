@@ -12,19 +12,31 @@ import UIKit
 
 struct User : ProducesCardViewModel{
     // app i kulanacak kullanıcılar için structre burada 
-    let name : String
-    let age : Int
-    let profession : String
-    let imageNames : [String]
+    let name : String?
+    let age : Int?
+    let profession : String?
+    let imageURL : String?
+    let uid : String?
+    
+    init(dictionary : [String: Any]){
+        self.name = dictionary["fullname"] as? String
+        self.age = dictionary["age"] as? Int
+        self.profession = dictionary["profession"] as? String
+        self.imageURL = dictionary["imageURL"] as? String
+        self.uid = dictionary["uid"] as? String
+    }
     
     
     // bir user ı cardViewModel de kullanabilmek adın var bu method.
     func toCardViewModel() -> CardViewModel{
-        let attributedText = NSMutableAttributedString(string:
-        " \(name)", attributes: [.font: UIFont.systemFont (ofSize: 32, weight: .heavy)])
-        attributedText.append(NSAttributedString(string:" \(age)", attributes: [.font: UIFont.systemFont (ofSize: 24, weight: .regular) ]))
-        attributedText.append (NSAttributedString(string: "\n  \(profession)", attributes: [.font: UIFont.systemFont (ofSize: 20, weight: .regular)]))
+        let ageString = age != nil ? "\(age!)" : "N\\A"
+        let professionString = profession != nil ? profession! : "not available"
         
-        return CardViewModel(imageNames: imageNames, attributedString: attributedText, textAlligment: .left)
+        let attributedText = NSMutableAttributedString(string:
+        " \(name ?? "")", attributes: [.font: UIFont.systemFont (ofSize: 32, weight: .heavy)])
+        attributedText.append(NSAttributedString(string:" \(ageString)", attributes: [.font: UIFont.systemFont (ofSize: 24, weight: .regular) ]))
+        attributedText.append (NSAttributedString(string: "\n  \(professionString)", attributes: [.font: UIFont.systemFont (ofSize: 20, weight: .regular)]))
+        
+        return CardViewModel(imageNames: [imageURL ?? ""], attributedString: attributedText, textAlligment: .left)
     }
 }

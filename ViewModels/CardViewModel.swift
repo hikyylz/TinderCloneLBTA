@@ -18,6 +18,7 @@ class CardViewModel{
     let imageNames: [String]
     let attributedString: NSAttributedString
     let textAlligment: NSTextAlignment      // yazımın ekranda nerede duracağını belirten şeye alignment denir.
+    
     fileprivate var imageIndex = 0 {
         didSet{
             let imageName = imageNames[imageIndex]
