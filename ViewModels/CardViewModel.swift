@@ -21,16 +21,15 @@ class CardViewModel{
     
     fileprivate var imageIndex = 0 {
         didSet{
-            let imageName = imageNames[imageIndex]
-            let image = UIImage(named: imageName)
-            imageIndexObserver?(imageIndex, image ?? UIImage())   // burada declare ediyorum closure u.
+            let urlString = imageNames[imageIndex]
+            imageIndexObserver?(imageIndex, urlString)   // burada declare ediyorum closure u.
         }
     }
     
     /// reactive programing örneğiymiş bu closure.
     // bu closure yapısını burada init edileceğini söylüyorum.
     // init edilmesi view class larından birinde olacak çünkü, view ile etkileşime girmek View class ının logic kontrol ve işlemler operasyonlar ViewModel class larının işidir.
-    var imageIndexObserver : ((Int, UIImage) -> ())?
+    var imageIndexObserver : ((Int, String) -> ())?
     
     
     init(imageNames: [String], attributedString: NSAttributedString, textAlligment: NSTextAlignment) {

@@ -21,10 +21,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         FirebaseApp.configure()
         
         guard let scene = (scene as? UIWindowScene) else { return }
-        
         window = UIWindow(windowScene: scene)
         window?.makeKeyAndVisible()
-        window?.rootViewController = HomeController()  // RegisterationViewController()
+        window?.rootViewController = HomeController() // RegisterationViewController()
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {

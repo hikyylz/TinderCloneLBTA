@@ -14,9 +14,10 @@ import JGProgressHUD
 extension RegisterationViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-        if let image = info[.originalImage] as? UIImage{
+        if let image = info[.editedImage] as? UIImage{
             registrationVM.bindableImage.value = image
         }
+        self.selectPhotoButton.setTitle(nil, for: .normal)
         dismiss(animated: true)
     }
     
@@ -61,6 +62,7 @@ class RegisterationViewController: UIViewController {
         button.layer.cornerRadius = 15
         button.addTarget(self, action: #selector(handleSelectPhoto), for: .touchUpInside)
         button.imageView?.contentMode = .scaleAspectFill  // photo sadece çerçeveye sığsın esnemeden.
+        button.imageView?.fillSuperview()
         button.clipsToBounds = true  // subView ların bunun çerçevesine tam oturmasını sağlayan bir değişkenmiş bu !
         return button
     }()
@@ -116,6 +118,7 @@ class RegisterationViewController: UIViewController {
         let imagePC = UIImagePickerController()
         imagePC.modalPresentationStyle = .fullScreen   // chatgpt e kurban olayım :)
         imagePC.delegate = self
+        imagePC.allowsEditing = true
         present(imagePC, animated: true)
     }
     
@@ -127,6 +130,10 @@ class RegisterationViewController: UIViewController {
                 return
             }
             // registering done.
+            let destVC = HomeController()
+            destVC.modalPresentationStyle = .fullScreen
+            self!.present(destVC, animated: true)
+            
         }
     }
     

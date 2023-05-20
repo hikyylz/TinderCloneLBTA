@@ -57,7 +57,7 @@ extension UIView {
     }
     
     func fillSuperview(padding: UIEdgeInsets = .zero) {
-        // çaşıştırdığım view u ekranın tamamına yayıyor bu method.
+        // çaşıştırdığım view u içinde bulunduğu view un tamamına yayıyor bu method.
         translatesAutoresizingMaskIntoConstraints = false
         if let superviewTopAnchor = superview?.topAnchor {
             topAnchor.constraint(equalTo: superviewTopAnchor, constant: padding.top).isActive = true

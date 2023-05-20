@@ -7,12 +7,14 @@
 
 import UIKit
 import Firebase
+import JGProgressHUD
 
 class HomeController: UIViewController {
 
     let topStackView = TopNavigationStackView()
     let cardsDeckView = UIView()
     let BottomSubviews = HomeButtonControlStackView()
+    var lastFetchedUser : User?    // pagination özelliğini kullanırken kaldığım user ı tütmak için var bu değişken.
     
     // ekranda gözükmesini istediğim her şeyin tanımlandığı yer burasıdır.
     // burda gösterebileceğim her şey ProducesCardViewModel ine uymak zorunda.
@@ -23,6 +25,7 @@ class HomeController: UIViewController {
         
         self.view.backgroundColor = .white
         topStackView.settingsButton.addTarget(self, action: #selector(handleSettings), for: .touchUpInside)
+        BottomSubviews.refreshButton.addTarget(self, action: #selector(handleRefresh), for: .touchUpInside)
         setupLayout()
         
     }
@@ -31,10 +34,22 @@ class HomeController: UIViewController {
         fetchUsersFromFirebase()
     }
     
+    @objc fileprivate func handleRefresh(){
+        fetchUsersFromFirebase()
+    }
+    
     fileprivate func fetchUsersFromFirebase(){
+        let fetcingUserHUD = JGProgressHUD(style: .dark)
+        fetcingUserHUD.textLabel.text = "People coming.."
+        fetcingUserHUD.show(in: self.view)
         
         // bu işlemler async await işlemler.. dikkatli ol neyi ne sırayla yaptığına.
-        Firestore.firestore().collection("users").getDocuments { snapShot, err in
+        // pagination özelliği için quey de özelleştire yapıyoruz.
+        let query = Firestore.firestore().collection("users").order(by: "uid").start(after: [lastFetchedUser?.uid ?? ""]).limit(to: 2)
+        query.getDocuments { snapShot, err in
+            
+            fetcingUserHUD.dismiss(animated: false)
+            
             if let _ = err{
                 // failed fetching user from firebase.
                 return
@@ -44,18 +59,31 @@ class HomeController: UIViewController {
             snapShot.documents.forEach({ documentSnapShot in
                 let userDictionary = documentSnapShot.data()
                 let fetchedUser = User(dictionary: userDictionary)
-                self.cardViewModels.append(fetchedUser.toCardViewModel())
+                // self.cardViewModels.append(fetchedUser.toCardViewModel())
+                self.lastFetchedUser = fetchedUser      // foreach den çıkmadan önce son user atanır.
+                self.setUpCardsDeckViewFromUser(user: fetchedUser)
             })
-            self.setupdummyCards()
+            //   self.setupFirestoreUserCards()
         }
     }
     
     @objc fileprivate func handleSettings(){
         let RegisterationViewController = RegisterationViewController()
+        RegisterationViewController.modalPresentationStyle = .fullScreen
         present(RegisterationViewController, animated: true)
     }
     
-    fileprivate func setupdummyCards(){
+    fileprivate func setUpCardsDeckViewFromUser(user: User){
+        // cardView taslağı oluştur..
+        let cardView = CardView(frame: .zero)
+        cardView.cardViewModel = user.toCardViewModel()
+        self.cardsDeckView.addSubview(cardView)
+        self.cardsDeckView.sendSubviewToBack(cardView)
+        cardView.fillSuperview()    // view u içene koyduğum view un boyutunu alsın tam olarak diye kullandığı enfes bir method.
+    }
+    
+    // "fetchUsersFromFirebase" methodunun son satırlarında bunu çalıştırmak pagination işlemime set vuruyordu, eski fetch ettiğim değerleri görmeye devam ediyordum. onun yerine başka bir methodla hallettim. Projenin başında elle oluşturduğum user ları şimdi cloud dan fetch ettiğim için 'cardViewModels' a ihtiyacım kalmadı. bu method boşa çıktı.
+    fileprivate func setupFirestoreUserCards(){
         cardViewModels.forEach { cardVM in
             // cardView taslağı oluştur..
             let cardView = CardView(frame: .zero)
@@ -73,7 +101,7 @@ class HomeController: UIViewController {
     
     
     
-    // MARK: - Fileprivate func  extracted method
+    // MARK: - Fileprivate func extracted method
     fileprivate func setupLayout() {
         // SwiftUI özellikleri ama eski versiyonu bu galiba.
         let overAllStackview = UIStackView(arrangedSubviews: [topStackView, cardsDeckView, BottomSubviews])

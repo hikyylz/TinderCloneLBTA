@@ -12,7 +12,7 @@ class CardView: UIView {
     
     fileprivate let infoLabel = UILabel()
     fileprivate let cardImage = UIImageView(image: UIImage(named: "lady1"))
-    fileprivate let threshold : CGFloat = 150
+    fileprivate let threshold : CGFloat = 150   // eşik
     fileprivate var imageIndex = 0
     fileprivate let gradientLayer = CAGradientLayer()
     fileprivate let barsStackView = UIStackView()
@@ -51,11 +51,13 @@ class CardView: UIView {
     
     fileprivate func setUpImageIndexObserver(){
         // imageIndexObserver işte burada initalize edilecek çünkü view larla etkileşime gireceksem bu class ın içerinde olmalıdır.
-        cardViewModel.imageIndexObserver = { (imageIndx, image) in
+        cardViewModel.imageIndexObserver = { (imageIndx, urlString) in
             self.barsStackView.arrangedSubviews.forEach { view in
                 view.backgroundColor = .gray
             }
-            self.cardImage.image = image
+            if let urlString = URL(string: urlString){
+                self.cardImage.sd_setImage(with: urlString)
+            }
             self.barsStackView.arrangedSubviews[imageIndx].backgroundColor = .white
         }
     }
@@ -97,7 +99,7 @@ class CardView: UIView {
     }
     
     override func layoutSubviews() {
-        // ekrandaki her alt görsel kendini oluştururken çağırılab nir mtehodmuş bu.
+        // ekrandaki her alt görsel kendini oluştururken çağırılan nir mtehodmuş bu.
         gradientLayer.frame = self.frame
     }
     
