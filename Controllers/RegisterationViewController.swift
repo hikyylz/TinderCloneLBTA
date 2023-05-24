@@ -7,7 +7,7 @@
 
 import UIKit
 import FirebaseAuth
-import FirebaseStorage
+// import FirebaseStorage
 import JGProgressHUD
 
 // extansion şeklinde yazmak bu şeyleri okunurluğu arttırıyor.

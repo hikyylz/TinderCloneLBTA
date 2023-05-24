@@ -14,7 +14,7 @@ class HomeController: UIViewController {
     let topStackView = TopNavigationStackView()
     let cardsDeckView = UIView()
     let BottomSubviews = HomeButtonControlStackView()
-    var lastFetchedUser : User?    // pagination özelliğini kullanırken kaldığım user ı tütmak için var bu değişken.
+    var lastFetchedUser : User?    // pagination özelliğini kullanırken kaldığım user ı tutmak için var bu değişken.
     
     // ekranda gözükmesini istediğim her şeyin tanımlandığı yer burasıdır.
     // burda gösterebileceğim her şey ProducesCardViewModel ine uymak zorunda.
@@ -26,13 +26,12 @@ class HomeController: UIViewController {
         self.view.backgroundColor = .white
         topStackView.settingsButton.addTarget(self, action: #selector(handleSettings), for: .touchUpInside)
         BottomSubviews.refreshButton.addTarget(self, action: #selector(handleRefresh), for: .touchUpInside)
+        fetchUsersFromFirebase()
         setupLayout()
         
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        fetchUsersFromFirebase()
-    }
+    
     
     @objc fileprivate func handleRefresh(){
         fetchUsersFromFirebase()
@@ -68,9 +67,11 @@ class HomeController: UIViewController {
     }
     
     @objc fileprivate func handleSettings(){
-        let RegisterationViewController = RegisterationViewController()
-        RegisterationViewController.modalPresentationStyle = .fullScreen
-        present(RegisterationViewController, animated: true)
+        let SettingsController = SettingsController()
+        // navigationController özelliklerini üzerinde uygulamak istediğim VC a bağlıyorum.
+        let navController = UINavigationController(rootViewController: SettingsController)
+        navController.modalPresentationStyle = .fullScreen
+        present(navController, animated: true)
     }
     
     fileprivate func setUpCardsDeckViewFromUser(user: User){

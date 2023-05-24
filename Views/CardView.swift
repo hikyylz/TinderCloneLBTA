@@ -87,7 +87,6 @@ class CardView: UIView {
         // vu StrackView içerisine ekleyeceğim subView ların aralarındaki boşluğu bununla ayarlamam gerekmekte.
         barsStackView.spacing = 4
         barsStackView.distribution = .fillEqually
-        
     }
     
     fileprivate func setUpGradientLayout(){

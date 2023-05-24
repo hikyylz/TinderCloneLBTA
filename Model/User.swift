@@ -12,11 +12,11 @@ import UIKit
 
 struct User : ProducesCardViewModel{
     // app i kulanacak kullanıcılar için structre burada 
-    let name : String?
-    let age : Int?
-    let profession : String?
-    let imageURL : String?
-    let uid : String?
+    var name : String?
+    var age : Int?
+    var profession : String?
+    var imageURL : String?
+    var uid : String?
     
     init(dictionary : [String: Any]){
         self.name = dictionary["fullname"] as? String

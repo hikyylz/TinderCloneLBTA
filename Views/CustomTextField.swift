@@ -7,6 +7,29 @@
 
 import UIKit
 
+
+// text Label
+class CustomTextLabel: UILabel {
+    
+    var padding : CGFloat
+    
+    init(padding: CGFloat) {
+        self.padding = padding
+        super.init(frame: .zero)
+    }
+    
+    override func drawText(in rect: CGRect) {
+        super.drawText(in: rect.insetBy(dx: padding, dy: 0))
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
+
+
+
+
 // bu custom text field class ından ürettiğim her text field height ı 50 olacak.
 class CustomTextField : UITextField{
     
