@@ -1,9 +1,8 @@
 //
 //  SettingsController.swift
-//  SwipeMatchFirestoreLBTA
+//  TinderCloneLBTA
 //
-//  Created by Brian Voong on 11/19/18.
-//  Copyright © 2018 Brian Voong. All rights reserved.
+//  Created by Kaan Yıldız on 15.05.2023.
 //
 
 import UIKit
@@ -68,6 +67,10 @@ class SettingsController: UITableViewController {
         tableView.backgroundColor = UIColor(white: 0.95, alpha: 1)
         // tableView.tableFooterView = UIView()
         tableView.keyboardDismissMode = .interactive   // scroll işlemi başlayınca keyboard u ekrandan kaldır.
+        fetchCurrentUser()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
         fetchCurrentUser()
     }
     
@@ -209,7 +212,7 @@ class SettingsController: UITableViewController {
             "uid" : currUserUid,
             "fullname" : currentUser?.name ?? "",
             "imageUrl" : currentUser?.imageURL ?? "",
-            "age" : currentUser?.age ?? 0,
+            "age" : currentUser?.age ?? "N/A",
             "profession" : currentUser?.profession ?? ""
         ] as [String : Any]
         

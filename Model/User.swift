@@ -22,7 +22,7 @@ struct User : ProducesCardViewModel{
         self.name = dictionary["fullname"] as? String
         self.age = dictionary["age"] as? Int
         self.profession = dictionary["profession"] as? String
-        self.imageURL = dictionary["imageURL"] as? String
+        self.imageURL = dictionary["imageUrl"] as? String
         self.uid = dictionary["uid"] as? String
     }
     
