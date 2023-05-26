@@ -7,32 +7,10 @@
 
 import UIKit
 import Firebase
+import FirebaseStorage
 import JGProgressHUD
 import SDWebImage
 
-extension SettingsController :UIImagePickerControllerDelegate, UINavigationControllerDelegate {
-    @objc func handleSelectPhoto(button: UIButton) {
-        let imagePicker = CustomImagePickerController()
-        imagePicker.delegate = self
-        imagePicker.imageButton = button
-        imagePicker.modalPresentationStyle = .fullScreen
-        present(imagePicker, animated: true)
-    }
-    
-    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-        if let selectedImage = info[.originalImage] as? UIImage{
-            if let picker = picker as? CustomImagePickerController{
-                picker.imageButton?.setImage(selectedImage.withRenderingMode(.alwaysOriginal), for: .normal)
-                
-            }
-        }
-        dismiss(animated: true)
-    }
-}
-
-class CustomImagePickerController: UIImagePickerController {
-    var imageButton: UIButton?
-}
 
 class SettingsController: UITableViewController {
     
@@ -45,7 +23,6 @@ class SettingsController: UITableViewController {
         fillUpHeaderWithImageButtons(header)
         return header
     }()
-    
     var currentUser: User?
     
     func createButton(selector: Selector) -> UIButton {
@@ -68,10 +45,7 @@ class SettingsController: UITableViewController {
         // tableView.tableFooterView = UIView()
         tableView.keyboardDismissMode = .interactive   // scroll işlemi başlayınca keyboard u ekrandan kaldır.
         fetchCurrentUser()
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        fetchCurrentUser()
+        
     }
     
     fileprivate func fetchCurrentUser(){
@@ -91,13 +65,31 @@ class SettingsController: UITableViewController {
     }
     
     fileprivate func loadCurrentUserPhotoToImageButtons(){
-        guard let imageUrl = currentUser?.imageURL, let url = URL(string: imageUrl) else { return }
-        // why exactly do we use this SDWebImageManager class to load our images?
-        SDWebImageManager.shared.loadImage(with: url, options: .continueInBackground, progress: nil) { (image, _, _, _, _, _) in
-            self.image1Button.setImage(image?.withRenderingMode(.alwaysOriginal), for: .normal)
-            // her nedense title image gelince kaybolmuyor ve imageView button içerisinde tam olarak oturmuyormuş.
-            self.image1Button.setTitle(nil, for: .normal)
+        if let imageUrl = currentUser?.imageURL1, let url = URL(string: imageUrl){
+            // why exactly do we use this SDWebImageManager class to load our images?
+            SDWebImageManager.shared.loadImage(with: url, options: .continueInBackground, progress: nil) { (image, _, _, _, _, _) in
+                self.image1Button.setImage(image?.withRenderingMode(.alwaysOriginal), for: .normal)
+                // her nedense title image gelince kaybolmuyor ve imageView button içerisinde tam olarak oturmuyormuş.
+                self.image1Button.setTitle(nil, for: .normal)
+            }
         }
+        
+        if let imageUrl2 = currentUser?.imageURL2, let url2 = URL(string: imageUrl2){
+            SDWebImageManager.shared.loadImage(with: url2, options: .continueInBackground, progress: nil) { (image, _, _, _, _, _) in
+                self.image2Button.setImage(image?.withRenderingMode(.alwaysOriginal), for: .normal)
+                // her nedense title image gelince kaybolmuyor ve imageView button içerisinde tam olarak oturmuyormuş.
+                self.image2Button.setTitle(nil, for: .normal)
+            }
+        }
+        
+        if let imageUrl3 = currentUser?.imageURL3, let url3 = URL(string: imageUrl3){
+            SDWebImageManager.shared.loadImage(with: url3, options: .continueInBackground, progress: nil) { (image, _, _, _, _, _) in
+                self.image3Button.setImage(image?.withRenderingMode(.alwaysOriginal), for: .normal)
+                // her nedense title image gelince kaybolmuyor ve imageView button içerisinde tam olarak oturmuyormuş.
+                self.image3Button.setTitle(nil, for: .normal)
+            }
+        }
+        
     }
     
     fileprivate func fillUpHeaderWithImageButtons(_ header: UIView) {
@@ -172,8 +164,12 @@ class SettingsController: UITableViewController {
             if let age = currentUser?.age {
                 cell.textField.text = String(age)
             }
-        default:
+        case 4:
             cell.textField.placeholder = "Enter Bio"
+            cell.textField.text = currentUser?.bio
+            cell.textField.addTarget(self, action: #selector(handleBioChange), for: .editingChanged)
+        default:
+            cell.textField.placeholder = ""
         }
         
         return cell
@@ -191,6 +187,10 @@ class SettingsController: UITableViewController {
         self.currentUser?.age = Int(textField.text ?? "")
     }
     
+    @objc fileprivate func handleBioChange(textField: UITextField){
+        self.currentUser?.bio = textField.text
+    }
+    
     fileprivate func setupNavigationItems() {
         navigationItem.title = "Settings"
         navigationController?.navigationBar.prefersLargeTitles = true
@@ -205,15 +205,31 @@ class SettingsController: UITableViewController {
         dismiss(animated: true)
     }
     
+    @objc fileprivate func handleImagesChange(){
+        print("not çalışıyor --------")
+        let alert = UIAlertController(title: "Photos changed", message: "But you donot save changes", preferredStyle: .alert)
+        let save = UIAlertAction(title: "ok save", style: .default) { _ in
+            self.handleSave()
+        }
+        alert.addAction(save)
+        self.present(alert, animated: true)
+    }
+    
     @objc fileprivate func handleSave(){
-        guard let currUserUid = Auth.auth().currentUser?.uid else {return}
+        let savingHUD = JGProgressHUD(style: .dark)
+        savingHUD.textLabel.text = "saving.."
+        savingHUD.show(in: self.view)
         
+        guard let currUserUid = Auth.auth().currentUser?.uid else {return}
         let documentData = [
             "uid" : currUserUid,
             "fullname" : currentUser?.name ?? "",
-            "imageUrl" : currentUser?.imageURL ?? "",
+            "imageUrl" : currentUser?.imageURL1 ?? "",
+            "imageUrl2" : currentUser?.imageURL2 ?? "",
+            "imageUrl3" : currentUser?.imageURL3 ?? "",
             "age" : currentUser?.age ?? "N/A",
-            "profession" : currentUser?.profession ?? ""
+            "profession" : currentUser?.profession ?? "",
+            "bio" : currentUser?.bio ?? ""
         ] as [String : Any]
         
         Firestore.firestore().collection("users").document(currUserUid).setData(documentData) { err in
@@ -221,6 +237,7 @@ class SettingsController: UITableViewController {
                 print("not saving")
             }
             // saving done
+            savingHUD.dismiss()
         }
     }
 

@@ -7,8 +7,13 @@
 
 import UIKit
 
+// custom image picker
+class CustomImagePickerController: UIImagePickerController {
+    var imageButton: UIButton?
+}
 
-// text Label
+
+// custom text Label
 class CustomTextLabel: UILabel {
     
     var padding : CGFloat
