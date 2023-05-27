@@ -115,6 +115,7 @@ class SettingsController: UITableViewController {
         }
         else{
             let headerLabel = CustomTextLabel(padding: 16)
+            headerLabel.font = UIFont.boldSystemFont(ofSize: 20)
             switch section {
             case 1:
                 headerLabel.text = "Name"
@@ -122,8 +123,12 @@ class SettingsController: UITableViewController {
                 headerLabel.text = "Profession"
             case 3:
                 headerLabel.text = "Age"
-            default:
+            case 4:
                 headerLabel.text = "Bio"
+            case 5:
+                headerLabel.text = "Seeking age range"
+            default:
+                headerLabel.text = ""
             }
             return headerLabel
         }
@@ -133,11 +138,12 @@ class SettingsController: UITableViewController {
         if section == 0 {
             return 300
         }
-        return 40
+        return 30
     }
     
     override func numberOfSections(in tableView: UITableView) -> Int {
-        return 5
+        // tableview umda kaç tane bölge görünsün istersin.
+        return 6
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -168,11 +174,25 @@ class SettingsController: UITableViewController {
             cell.textField.placeholder = "Enter Bio"
             cell.textField.text = currentUser?.bio
             cell.textField.addTarget(self, action: #selector(handleBioChange), for: .editingChanged)
+        case 5:
+            let cell = createSliderComponents()
+            return cell
+            
         default:
             cell.textField.placeholder = ""
         }
         
         return cell
+    }
+    
+    fileprivate func createSliderComponents() -> AgeRangeTableViewCell{
+        let cell = AgeRangeTableViewCell(style: .default, reuseIdentifier: nil)
+        cell.minSlader.addTarget(self, action: #selector(handleMinAgeChange), for: .touchUpInside)
+        return cell
+    }
+    
+    @objc fileprivate func handleMinAgeChange(slider: UISlider){
+        
     }
     
     @objc fileprivate func handleNameChange(textField: UITextField) {

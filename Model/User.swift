@@ -43,6 +43,12 @@ struct User : ProducesCardViewModel{
         attributedText.append(NSAttributedString(string:" \(ageString)", attributes: [.font: UIFont.systemFont (ofSize: 24, weight: .regular) ]))
         attributedText.append (NSAttributedString(string: "\n  \(professionString)", attributes: [.font: UIFont.systemFont (ofSize: 20, weight: .regular)]))
         
-        return CardViewModel(imageNames: [imageURL1 ?? ""], attributedString: attributedText, textAlligment: .left)
+        // internetten çektiğim insanların kaç tane kayıtlı fotografları var bilmiyorum ona göre ayarlanan bu string dizisini return etmek için hazırlıyorum.
+        var imageURLs = [String]()
+        if let url = imageURL1{ imageURLs.append(url)}
+        if let url = imageURL2{ imageURLs.append(url)}
+        if let url = imageURL3{ imageURLs.append(url)}
+        
+        return CardViewModel(imageNames: imageURLs, attributedString: attributedText, textAlligment: .left)
     }
 }
