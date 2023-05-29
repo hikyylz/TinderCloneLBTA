@@ -21,6 +21,10 @@ struct User : ProducesCardViewModel{
     var bio : String?
     var uid : String?
     
+    // arama sonuçlarında sadece belirtilen yaş aralığındaki insanları seçmek için kriter oluşturuyoruz.
+    var minSeekingAge : Int?
+    var maxSeekingAge : Int?
+    
     init(dictionary : [String: Any]){
         self.name = dictionary["fullname"] as? String
         self.age = dictionary["age"] as? Int
@@ -30,6 +34,8 @@ struct User : ProducesCardViewModel{
         self.imageURL3 = dictionary["imageUrl3"] as? String
         self.bio = dictionary["bio"] as? String
         self.uid = dictionary["uid"] as? String
+        self.minSeekingAge = dictionary["minSeekingAge"] as? Int
+        self.maxSeekingAge = dictionary["maxSeekingAge"] as? Int
     }
     
     

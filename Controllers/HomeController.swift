@@ -15,6 +15,7 @@ class HomeController: UIViewController {
     let cardsDeckView = UIView()
     let BottomSubviews = HomeButtonControlStackView()
     var lastFetchedUser : User?    // pagination özelliğini kullanırken kaldığım user ı tutmak için var bu değişken.
+    fileprivate var currentUser : User?
     
     // ekranda gözükmesini istediğim her şeyin tanımlandığı yer burasıdır.
     // burda gösterebileceğim her şey ProducesCardViewModel ine uymak zorunda.
@@ -26,25 +27,44 @@ class HomeController: UIViewController {
         self.view.backgroundColor = .white
         topStackView.settingsButton.addTarget(self, action: #selector(handleSettings), for: .touchUpInside)
         BottomSubviews.refreshButton.addTarget(self, action: #selector(handleRefresh), for: .touchUpInside)
-        fetchUsersFromFirebase()
         setupLayout()
+        fetchCurrentUser()
+        
         
     }
     
-    
+    fileprivate func fetchCurrentUser(){
+        // current user ın settings bilgilerini almam gerek..
+        guard let uid = Auth.auth().currentUser?.uid else {return}
+        Firestore.firestore().collection("users").document(uid).getDocument { snapShot, err in
+            if let err = err{
+                print(err)
+                return
+            }
+            
+            guard let userData = snapShot?.data() as? [String : Any] else {return}
+            self.currentUser = User(dictionary: userData)
+            self.fetchUsersFromFirebase()
+        }
+    }
     
     @objc fileprivate func handleRefresh(){
         fetchUsersFromFirebase()
     }
     
     fileprivate func fetchUsersFromFirebase(){
+        // homeView da current user ın kriterler koyduğu insanlar gözüksün işlemleri..
+        guard var minAge = currentUser?.minSeekingAge, var maxAge = currentUser?.maxSeekingAge else{
+            return
+        }
+        
         let fetcingUserHUD = JGProgressHUD(style: .dark)
         fetcingUserHUD.textLabel.text = "People coming.."
         fetcingUserHUD.show(in: self.view)
         
         // bu işlemler async await işlemler.. dikkatli ol neyi ne sırayla yaptığına.
         // pagination özelliği için quey de özelleştire yapıyoruz.
-        let query = Firestore.firestore().collection("users").order(by: "uid").start(after: [lastFetchedUser?.uid ?? ""]).limit(to: 2)
+        let query = Firestore.firestore().collection("users").whereField("age", isGreaterThan: minAge).whereField("age", isLessThan: maxAge)
         query.getDocuments { snapShot, err in
             
             fetcingUserHUD.dismiss(animated: false)

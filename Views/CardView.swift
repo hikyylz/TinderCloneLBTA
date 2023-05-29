@@ -98,7 +98,7 @@ class CardView: UIView {
     }
     
     override func layoutSubviews() {
-        // ekrandaki her alt görsel kendini oluştururken çağırılan nir mtehodmuş bu.
+        // ekrandaki her alt görsel kendini oluştururken çağırılan bir methotmuş bu.
         gradientLayer.frame = self.frame
     }
     

@@ -187,12 +187,27 @@ class SettingsController: UITableViewController {
     
     fileprivate func createSliderComponents() -> AgeRangeTableViewCell{
         let cell = AgeRangeTableViewCell(style: .default, reuseIdentifier: nil)
-        cell.minSlader.addTarget(self, action: #selector(handleMinAgeChange), for: .touchUpInside)
+        cell.minSlider.addTarget(self, action: #selector(handleMinAgeChange), for: .valueChanged)
+        cell.maxSlider.addTarget(self, action: #selector(handleMaxAgeChange), for: .valueChanged)
+        cell.minLabel.text = "Min \(currentUser?.minSeekingAge ?? -1)"
+        cell.maxLabel.text = "Max \(currentUser?.maxSeekingAge ?? -1)"
+        cell.minSlider.value = Float(currentUser?.minSeekingAge ?? -1)
+        cell.maxSlider.value = Float(currentUser?.maxSeekingAge ?? -1)
         return cell
     }
     
+    @objc fileprivate func handleMaxAgeChange(slider: UISlider){
+        let indexPath = IndexPath(row: 0, section: 5)
+        let ageRangeCell = tableView.cellForRow(at: indexPath) as! AgeRangeTableViewCell
+        ageRangeCell.maxLabel.text = "Max \(Int(slider.value))"
+        self.currentUser?.maxSeekingAge = Int(slider.value)
+    }
+    
     @objc fileprivate func handleMinAgeChange(slider: UISlider){
-        
+        let indexPath = IndexPath(row: 0, section: 5)
+        let ageRangeCell = tableView.cellForRow(at: indexPath) as! AgeRangeTableViewCell
+        ageRangeCell.minLabel.text = "Min \(Int(slider.value))"
+        self.currentUser?.minSeekingAge = Int(slider.value)
     }
     
     @objc fileprivate func handleNameChange(textField: UITextField) {
@@ -249,7 +264,9 @@ class SettingsController: UITableViewController {
             "imageUrl3" : currentUser?.imageURL3 ?? "",
             "age" : currentUser?.age ?? "N/A",
             "profession" : currentUser?.profession ?? "",
-            "bio" : currentUser?.bio ?? ""
+            "bio" : currentUser?.bio ?? "",
+            "minSeekingAge": currentUser?.minSeekingAge ?? -1,
+            "maxSeekingAge": currentUser?.maxSeekingAge ?? -1
         ] as [String : Any]
         
         Firestore.firestore().collection("users").document(currUserUid).setData(documentData) { err in

@@ -10,14 +10,14 @@ import UIKit
 class AgeRangeTableViewCell: UITableViewCell {
     
     // bu iki component ekranda kaydırılarak bir değeri ayarlamama yarıyorlarmış.
-    let minSlader : UISlider = {
+    let minSlider : UISlider = {
         let Slider = UISlider()
         Slider.minimumValue = 18
         Slider.maximumValue = 18
         return Slider
     }()
     
-    let maxSlader : UISlider = {
+    let maxSlider : UISlider = {
         let Slider = UISlider()
         Slider.minimumValue = 18
         Slider.maximumValue = 18
@@ -48,12 +48,9 @@ class AgeRangeTableViewCell: UITableViewCell {
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
-        minSlader.isUserInteractionEnabled = true
-        maxSlader.isUserInteractionEnabled = true   // bunlar hareket etmiyor.
-        
         let overallStackView = UIStackView(arrangedSubviews: [
-            UIStackView(arrangedSubviews: [minLabel, minSlader]),
-            UIStackView(arrangedSubviews: [maxLabel, maxSlader])
+            UIStackView(arrangedSubviews: [minLabel, minSlider]),
+            UIStackView(arrangedSubviews: [maxLabel, maxSlider])
         ])
         
         overallStackView.axis = .vertical // dikey
