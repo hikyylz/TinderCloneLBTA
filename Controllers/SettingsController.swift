@@ -11,8 +11,14 @@ import FirebaseStorage
 import JGProgressHUD
 import SDWebImage
 
+protocol SettingsControllerDelegate {
+    func didSaveSettings()
+}
+
 
 class SettingsController: UITableViewController {
+    
+    var delegate : SettingsControllerDelegate?
     
     // instance properties
     lazy var image1Button = createButton(selector: #selector(handleSelectPhoto))
@@ -175,8 +181,8 @@ class SettingsController: UITableViewController {
             cell.textField.text = currentUser?.bio
             cell.textField.addTarget(self, action: #selector(handleBioChange), for: .editingChanged)
         case 5:
-            let cell = createSliderComponents()
-            return cell
+            let slidercell = createSliderComponents()
+            return slidercell
             
         default:
             cell.textField.placeholder = ""
@@ -240,15 +246,6 @@ class SettingsController: UITableViewController {
         dismiss(animated: true)
     }
     
-    @objc fileprivate func handleImagesChange(){
-        print("not çalışıyor --------")
-        let alert = UIAlertController(title: "Photos changed", message: "But you donot save changes", preferredStyle: .alert)
-        let save = UIAlertAction(title: "ok save", style: .default) { _ in
-            self.handleSave()
-        }
-        alert.addAction(save)
-        self.present(alert, animated: true)
-    }
     
     @objc fileprivate func handleSave(){
         let savingHUD = JGProgressHUD(style: .dark)
@@ -275,6 +272,9 @@ class SettingsController: UITableViewController {
             }
             // saving done
             savingHUD.dismiss()
+            self.dismiss(animated: true) {
+                self.delegate?.didSaveSettings()
+            }
         }
     }
 

@@ -9,8 +9,8 @@ import UIKit
 import Firebase
 import JGProgressHUD
 
-class HomeController: UIViewController {
-
+class HomeController: UIViewController, SettingsControllerDelegate {
+    
     let topStackView = TopNavigationStackView()
     let cardsDeckView = UIView()
     let BottomSubviews = HomeButtonControlStackView()
@@ -88,10 +88,15 @@ class HomeController: UIViewController {
     
     @objc fileprivate func handleSettings(){
         let SettingsController = SettingsController()
+        SettingsController.delegate = self
         // navigationController özelliklerini üzerinde uygulamak istediğim VC a bağlıyorum.
         let navController = UINavigationController(rootViewController: SettingsController)
         navController.modalPresentationStyle = .fullScreen
         present(navController, animated: true)
+    }
+    
+    func didSaveSettings() {
+        fetchCurrentUser()
     }
     
     fileprivate func setUpCardsDeckViewFromUser(user: User){
@@ -104,7 +109,7 @@ class HomeController: UIViewController {
     }
     
     // "fetchUsersFromFirebase" methodunun son satırlarında bunu çalıştırmak pagination işlemime set vuruyordu, eski fetch ettiğim değerleri görmeye devam ediyordum. onun yerine başka bir methodla hallettim. Projenin başında elle oluşturduğum user ları şimdi cloud dan fetch ettiğim için 'cardViewModels' a ihtiyacım kalmadı. bu method boşa çıktı.
-    fileprivate func setupFirestoreUserCards(){
+    fileprivate func setupFirestoreUserCards(){  // kullanılmıyor.
         cardViewModels.forEach { cardVM in
             // cardView taslağı oluştur..
             let cardView = CardView(frame: .zero)
