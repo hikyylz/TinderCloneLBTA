@@ -20,6 +20,16 @@ extension HomeController: LoginControllerDelegate{
     }
 }
 
+extension HomeController: CardviewDelegate{
+    // display moreInfo about person on the screen
+    func didTappedMoreInfo() {
+        print("1")
+        let userDetailController = UserDetailsViewController()
+        userDetailController.modalPresentationStyle = .fullScreen
+        present(userDetailController, animated: true)
+    }
+}
+
 class HomeController: UIViewController {
     
     let topStackView = TopNavigationStackView()
@@ -28,9 +38,6 @@ class HomeController: UIViewController {
     var lastFetchedUser : User?    // pagination özelliğini kullanırken kaldığım user ı tutmak için var bu değişken.
     fileprivate var currentUser : User?
     
-    // ekranda gözükmesini istediğim her şeyin tanımlandığı yer burasıdır.
-    // burda gösterebileceğim her şey ProducesCardViewModel ine uymak zorunda.
-    var cardViewModels = [CardViewModel]()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -98,11 +105,12 @@ class HomeController: UIViewController {
             snapShot.documents.forEach({ documentSnapShot in
                 let userDictionary = documentSnapShot.data()
                 let fetchedUser = User(dictionary: userDictionary)
-                // self.cardViewModels.append(fetchedUser.toCardViewModel())
                 self.lastFetchedUser = fetchedUser      // foreach den çıkmadan önce son user atanır.
-                self.setUpCardsDeckViewFromUser(user: fetchedUser)
+                // kendimi swap lamak istemiyorum.
+                if self.currentUser?.uid != fetchedUser.uid{
+                    self.setUpCardsDeckViewFromUser(user: fetchedUser)
+                }
             })
-            //   self.setupFirestoreUserCards()
         }
     }
     
@@ -115,7 +123,6 @@ class HomeController: UIViewController {
         present(navController, animated: true)
     }
     
-    
     fileprivate func setUpCardsDeckViewFromUser(user: User){
         // cardView taslağı oluştur..
         let cardView = CardView(frame: .zero)
@@ -124,23 +131,6 @@ class HomeController: UIViewController {
         self.cardsDeckView.sendSubviewToBack(cardView)
         cardView.fillSuperview()    // view u içene koyduğum view un boyutunu alsın tam olarak diye kullandığı enfes bir method.
     }
-    
-    // "fetchUsersFromFirebase" methodunun son satırlarında bunu çalıştırmak pagination işlemime set vuruyordu, eski fetch ettiğim değerleri görmeye devam ediyordum. onun yerine başka bir methodla hallettim. Projenin başında elle oluşturduğum user ları şimdi cloud dan fetch ettiğim için 'cardViewModels' a ihtiyacım kalmadı. bu method boşa çıktı.
-    fileprivate func setupFirestoreUserCards(){  // kullanılmıyor.
-        cardViewModels.forEach { cardVM in
-            // cardView taslağı oluştur..
-            let cardView = CardView(frame: .zero)
-            
-            // taslağa değerler yerleştir..
-            cardView.cardViewModel = cardVM
-            
-            // oluşturulan view u ekranda gözükecek viewun içine yerleştirelim.
-            self.cardsDeckView.addSubview(cardView)
-            cardView.fillSuperview()
-        }
-        
-    }
-    
     
     
     

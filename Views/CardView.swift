@@ -8,7 +8,14 @@
 import UIKit
 import SDWebImage
 
+protocol CardviewDelegate {
+    // moreInfo buttonuna basıldığında gözükecek VC ın ayarlarını VC class larından birinde yapmak için delegate 'yetki' vereceğim.
+    func didTappedMoreInfo()
+}
+
 class CardView: UIView {
+    
+    var delegate : CardviewDelegate?
     
     fileprivate let infoLabel = UILabel()
     fileprivate let cardImage = UIImageView(image: UIImage(named: "lady1"))
@@ -61,6 +68,32 @@ class CardView: UIView {
         }
     }
     
+    fileprivate var moreInfoButton : UIButton = {
+        let button = UIButton()
+        button.setImage(UIImage(named: "info_icon"), for: .normal)
+        button.addTarget(self, action: #selector(handleMoreInfo), for: .touchUpInside)
+        return button
+    }()
+    
+    @objc fileprivate func handleMoreInfo(){
+        // gerekli işlemlerin yapılması için func çağırılıyor delegate den.
+        delegate?.didTappedMoreInfo()
+        print("2")
+        /*
+        // başka bir VC açılsın isityorum lakin bu bir View, soo
+        // hack yapıyoruz..
+        if let rootViewController = UIApplication.shared.keyWindow?.rootViewController{
+            let userDetailController = UIViewController()
+            userDetailController.modalPresentationStyle = .fullScreen
+            userDetailController.view.backgroundColor = .yellow
+            rootViewController.present(userDetailController, animated: true)
+        }else{
+            print("keyWindow çalışmadı bu ios sürümünde.")
+            return
+        }
+        */
+    }
+    
     fileprivate func setUpLayout() {
         layer.cornerRadius = 10
         clipsToBounds = true
@@ -77,6 +110,9 @@ class CardView: UIView {
         
         // view umda göstereceğim yazıların özelliklerini buradan ayarlıyorum.
         infoLabel.anchor(top: nil, leading: leadingAnchor, bottom: bottomAnchor, trailing: trailingAnchor, padding: .init(top: 0, left: 16, bottom: 16, right: 16))
+        
+        addSubview(moreInfoButton)
+        moreInfoButton.anchor(top: nil, leading: nil, bottom: bottomAnchor, trailing: trailingAnchor, padding: .init(top: 0, left: 0, bottom: 16, right: 16), size: .init(width: 44, height: 44)) // apple guideLine ına göre button lar 40 tan buyuk olmalıymış basılabilmeleri kolay olması içim.
     }
     
     fileprivate func setUpBarsStackView(){
