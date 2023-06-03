@@ -10,8 +10,19 @@ import UIKit
 class AgeRangeTableViewCell: UITableViewCell {
     
     // bu iki component ekranda kaydırılarak bir değeri ayarlamama yarıyorlarmış.
-    let minSlider = UISlider()
-    let maxSlider = UISlider()
+    let minSlider : UISlider = {
+        let slider = UISlider()
+        slider.minimumValue = 18
+        slider.maximumValue = 100
+        return slider
+    }()
+    
+    let maxSlider : UISlider = {
+        let slider = UISlider()
+        slider.minimumValue = 18
+        slider.maximumValue = 100
+        return slider
+    }()
     
     let minLabel : UILabel = {
        let label = AgeRangeLabel()

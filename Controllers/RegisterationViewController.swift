@@ -78,6 +78,16 @@ class RegisterationViewController: UIViewController {
         button.addTarget(self, action: #selector(handleRegister), for: .touchUpInside)
         return button
     }()
+    let LogInButton : UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("go to logIn", for: .normal)
+        button.setTitleColor(.white, for: .normal)
+        button.backgroundColor =  .systemPink
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 15, weight: .medium)
+        button.layer.cornerRadius = 25
+        button.addTarget(self, action: #selector(handleLogIn), for: .touchUpInside)
+        return button
+    }()
     let fullNameTextField : CustomTextField = {
         let TF = CustomTextField(padding: 16)
         TF.placeholder = "Enter full name"
@@ -112,6 +122,11 @@ class RegisterationViewController: UIViewController {
         setUpNotificationObserver()
         setUpTapGestureForDismissingKeyboard()
         setupRegisterationViewModelObserver()
+    }
+    
+    @objc fileprivate func handleLogIn(){
+        let LogInController = LoginController()
+        navigationController?.pushViewController(LogInController, animated: true)
     }
     
     @objc fileprivate func handleSelectPhoto(){
@@ -237,6 +252,8 @@ class RegisterationViewController: UIViewController {
         overallStackView.spacing = 8
         overallStackView.anchor(top: nil, leading: view.leadingAnchor, bottom: nil, trailing: view.trailingAnchor, padding: .init(top: 0, left: 32, bottom: 0, right: 32))
         overallStackView.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
+        view.addSubview(LogInButton)
+        LogInButton.anchor(top: nil, leading: view.leadingAnchor, bottom: view.safeAreaLayoutGuide.bottomAnchor, trailing: view.trailingAnchor)
     }
     
     
@@ -249,7 +266,7 @@ class RegisterationViewController: UIViewController {
     
     fileprivate func setUpGradientColor(){
         gradiantLayer.colors = [UIColor.systemOrange.cgColor, UIColor.systemPink.cgColor]
-        gradiantLayer.locations = [0, 1.1]
+        gradiantLayer.locations = [0, 1]
         view.layer.addSublayer(gradiantLayer)
         gradiantLayer.frame = view.bounds
         

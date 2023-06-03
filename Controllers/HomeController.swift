@@ -8,8 +8,19 @@
 import UIKit
 import Firebase
 import JGProgressHUD
+extension HomeController: SettingsControllerDelegate{
+    func didSaveSettings() {
+        self.fetchCurrentUser()
+    }
+}
 
-class HomeController: UIViewController, SettingsControllerDelegate {
+extension HomeController: LoginControllerDelegate{
+    func didFinishLoggingIn() {
+        self.fetchCurrentUser()
+    }
+}
+
+class HomeController: UIViewController {
     
     let topStackView = TopNavigationStackView()
     let cardsDeckView = UIView()
@@ -29,8 +40,17 @@ class HomeController: UIViewController, SettingsControllerDelegate {
         BottomSubviews.refreshButton.addTarget(self, action: #selector(handleRefresh), for: .touchUpInside)
         setupLayout()
         fetchCurrentUser()
-        
-        
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        // uygulama açıldığında login olmuş olan user yoksa registerController a git.
+        if Auth.auth().currentUser == nil{
+            let Registrationcontroller = RegisterationViewController()
+            let navController = UINavigationController(rootViewController: Registrationcontroller)
+            navController.modalPresentationStyle = .fullScreen
+            present(navController, animated: true)
+        }
     }
     
     fileprivate func fetchCurrentUser(){
@@ -54,7 +74,7 @@ class HomeController: UIViewController, SettingsControllerDelegate {
     
     fileprivate func fetchUsersFromFirebase(){
         // homeView da current user ın kriterler koyduğu insanlar gözüksün işlemleri..
-        guard var minAge = currentUser?.minSeekingAge, var maxAge = currentUser?.maxSeekingAge else{
+        guard let minAge = currentUser?.minSeekingAge, let maxAge = currentUser?.maxSeekingAge else{
             return
         }
         
@@ -95,9 +115,6 @@ class HomeController: UIViewController, SettingsControllerDelegate {
         present(navController, animated: true)
     }
     
-    func didSaveSettings() {
-        fetchCurrentUser()
-    }
     
     fileprivate func setUpCardsDeckViewFromUser(user: User){
         // cardView taslağı oluştur..
