@@ -21,9 +21,7 @@ extension HomeController: LoginControllerDelegate{
 }
 
 extension HomeController: CardviewDelegate{
-    // display moreInfo about person on the screen
-    func didTappedMoreInfo() {
-        print("1")
+    func didTappedMoreInfo(){
         let userDetailController = UserDetailsViewController()
         userDetailController.modalPresentationStyle = .fullScreen
         present(userDetailController, animated: true)
@@ -126,6 +124,7 @@ class HomeController: UIViewController {
     fileprivate func setUpCardsDeckViewFromUser(user: User){
         // cardView taslağı oluştur..
         let cardView = CardView(frame: .zero)
+        cardView.delegate = self         // delegation işleminde bu satırı yazmayı unutmasaydın güzel olurdu.
         cardView.cardViewModel = user.toCardViewModel()
         self.cardsDeckView.addSubview(cardView)
         self.cardsDeckView.sendSubviewToBack(cardView)

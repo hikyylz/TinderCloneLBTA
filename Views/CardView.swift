@@ -69,8 +69,8 @@ class CardView: UIView {
     }
     
     fileprivate var moreInfoButton : UIButton = {
-        let button = UIButton()
-        button.setImage(UIImage(named: "info_icon"), for: .normal)
+        let button = UIButton(type: .system)
+        button.setImage(UIImage(named: "info_icon")?.withRenderingMode(.alwaysOriginal), for: .normal)
         button.addTarget(self, action: #selector(handleMoreInfo), for: .touchUpInside)
         return button
     }()
