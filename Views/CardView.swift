@@ -10,7 +10,7 @@ import SDWebImage
 
 protocol CardviewDelegate {
     // moreInfo buttonuna basıldığında gözükecek VC ın ayarlarını VC class larından birinde yapmak için delegate 'yetki' vereceğim.
-    func didTappedMoreInfo()
+    func didTappedMoreInfo(cardViewModel: CardViewModel)
 }
 
 class CardView: UIView {
@@ -27,14 +27,14 @@ class CardView: UIView {
     // bu değişken..
     var cardViewModel : CardViewModel!{
         didSet{
-            let imageName = cardViewModel.imageNames.first ?? ""
+            let imageName = cardViewModel.imageUrls.first ?? ""
             if let url = URL(string: imageName){
                 cardImage.sd_setImage(with: url)                // external library
             }
             infoLabel.attributedText = cardViewModel.attributedString
             infoLabel.textAlignment = cardViewModel.textAlligment
             
-            (0..<cardViewModel.imageNames.count).forEach { _ in
+            (0..<cardViewModel.imageUrls.count).forEach { _ in
                 let barView = UIView()
                 barView.backgroundColor = UIColor.gray
                 barsStackView.addArrangedSubview(barView)
@@ -77,8 +77,8 @@ class CardView: UIView {
     
     @objc fileprivate func handleMoreInfo(){
         // gerekli işlemlerin yapılması için func çağırılıyor delegate den.
-        delegate?.didTappedMoreInfo()
-        print("2")
+        delegate?.didTappedMoreInfo(cardViewModel: self.cardViewModel)
+        
         /*
         // başka bir VC açılsın isityorum lakin bu bir View, soo
         // hack yapıyoruz..

@@ -8,6 +8,8 @@
 import UIKit
 import Firebase
 import JGProgressHUD
+
+
 extension HomeController: SettingsControllerDelegate{
     func didSaveSettings() {
         self.fetchCurrentUser()
@@ -21,8 +23,10 @@ extension HomeController: LoginControllerDelegate{
 }
 
 extension HomeController: CardviewDelegate{
-    func didTappedMoreInfo(){
+    
+    func didTappedMoreInfo(cardViewModel: CardViewModel) {
         let userDetailController = UserDetailsViewController()
+        userDetailController.userCardViewModel = cardViewModel
         userDetailController.modalPresentationStyle = .fullScreen
         present(userDetailController, animated: true)
     }

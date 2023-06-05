@@ -15,13 +15,13 @@ protocol ProducesCardViewModel {
 
 // view model is supposed to represend the state of view.
 class CardViewModel{
-    let imageNames: [String]
+    let imageUrls: [String]
     let attributedString: NSAttributedString
     let textAlligment: NSTextAlignment      // yazımın ekranda nerede duracağını belirten şeye alignment denir.
     
     fileprivate var imageIndex = 0 {
         didSet{
-            let urlString = imageNames[imageIndex]
+            let urlString = imageUrls[imageIndex]
             imageIndexObserver?(imageIndex, urlString)   // burada declare ediyorum closure u.
         }
     }
@@ -33,13 +33,13 @@ class CardViewModel{
     
     
     init(imageNames: [String], attributedString: NSAttributedString, textAlligment: NSTextAlignment) {
-        self.imageNames = imageNames
+        self.imageUrls = imageNames
         self.attributedString = attributedString
         self.textAlligment = textAlligment
     }
     
     func advanceToNextPhoto(){
-        imageIndex = min(imageIndex+1, imageNames.count-1)
+        imageIndex = min(imageIndex+1, imageUrls.count-1)
     }
     
     func goTopreviousPhoto(){
