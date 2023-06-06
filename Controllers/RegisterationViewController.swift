@@ -16,6 +16,7 @@ extension RegisterationViewController: UIImagePickerControllerDelegate, UINaviga
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         if let image = info[.editedImage] as? UIImage{
             registrationVM.bindableImage.value = image
+            registrationVM.checkFormValidity()
         }
         self.selectPhotoButton.setTitle(nil, for: .normal)
         dismiss(animated: true)

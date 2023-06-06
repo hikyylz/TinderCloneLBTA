@@ -32,8 +32,8 @@ class RegisterationViewModel{
     var bindableImage = Bindable<UIImage>()
     var bindableIsFormValid = Bindable<Bool>()
     
-    fileprivate func checkFormValidity() {
-        let isFormValid = fullName?.isEmpty == false && email?.isEmpty == false && password?.isEmpty == false
+    func checkFormValidity() {
+        let isFormValid = fullName?.isEmpty == false && email?.isEmpty == false && password?.isEmpty == false && bindableImage.value != nil
         bindableIsFormValid.value = isFormValid
     }
     
@@ -81,12 +81,15 @@ class RegisterationViewModel{
     }
     
     fileprivate func saveInfoToFirestore(imageURL: String?, completion: @escaping(Error?) -> ()){
+        // yeni kullanıcı app e kaydoldu ve firestore da depolayacağım ben bu insanı.
         guard let URL = imageURL else{ return }
         let uid = Auth.auth().currentUser?.uid ?? ""
         let docData = [
             "fullname" : fullName ?? "",
             "uid" : uid,
-            "imageUrl" : URL
+            "imageUrl" : URL,
+            "minSeekingAge" : 18,
+            "maxSeekingAge" : 100
         ] as [String : Any]
         
         Firestore.firestore().collection("users").document(uid).setData(docData) { err in

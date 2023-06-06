@@ -23,8 +23,8 @@ extension HomeController: LoginControllerDelegate{
 }
 
 extension HomeController: CardviewDelegate{
-    
-    func didTappedMoreInfo(cardViewModel: CardViewModel) {
+    // ekrandaki insanın detaylarının olduğu pencereye gitmemi sağlayan çağrı buradan yayınlanıyor.
+    func didTappedMoreInfo(cardViewModel: CardViewModel){
         let userDetailController = UserDetailsViewController()
         userDetailController.userCardViewModel = cardViewModel
         userDetailController.modalPresentationStyle = .fullScreen

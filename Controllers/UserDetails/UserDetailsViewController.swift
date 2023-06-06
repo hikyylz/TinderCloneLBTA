@@ -15,8 +15,7 @@ class UserDetailsViewController: UIViewController, UIScrollViewDelegate {
             // bu değişkene atama işlemleri gerçekleştikten sonra şu işlemleri yap...
             // ekranda gözüken card view ile hangi kullanıcının bilgilerini görmek istiyorsam çalışan bir yapı var burada.
             infoLabel.attributedText = userCardViewModel.attributedString
-            guard let firstImageUrlString = userCardViewModel.imageUrls.first, let myUrl = URL(string: firstImageUrlString) else{return}
-            personImageView.sd_setImage(with: myUrl)
+            swipingView.cardViewModel = userCardViewModel
         }
     }
     
@@ -28,13 +27,11 @@ class UserDetailsViewController: UIViewController, UIScrollViewDelegate {
         sv.delegate = self
         return sv
     }()
-    var personImageView : UIImageView = {
-        let iv = UIImageView()
-        iv.image = UIImage(named: "kelly1")
-        iv.contentMode = .scaleAspectFill
-        iv.clipsToBounds = true
-        return iv
-    }()
+    
+    // ekranda ilgi duyulan insanın foto larını görebilmek için bunu böyle yapıcaz...
+    let swipingView = SwipingPhotosController(transitionStyle: .scroll, navigationOrientation: .horizontal)
+    lazy var personImageView = swipingView.view!
+    
     var infoLabel : UILabel = {
         let il = UILabel()
         il.text = "user name\nkaan\nuser age\n23"
@@ -52,6 +49,22 @@ class UserDetailsViewController: UIViewController, UIScrollViewDelegate {
     lazy var likeButton = self.createButton(image: UIImage(imageLiteralResourceName: "like_circle"), selector: #selector(handleLike))
     lazy var superlikeButton = self.createButton(image: UIImage(imageLiteralResourceName: "super_like_circle"), selector: #selector(handleSuperlike))
     
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        view.backgroundColor = .white
+        setUpLayout()
+        setUpBlueVisualEffectView()
+        setUpBottomControls()
+        
+    }
+    
+    override func viewWillLayoutSubviews() {
+        // bu method ekrandaki subView ları yerleştirirken çağrılan bir methodmuş..
+        super.viewWillLayoutSubviews()
+        personImageView.frame = CGRect(x: 0, y: 30, width: view.frame.width, height: view.frame.width)
+    }
+    
     // userDeatil VC ında alttaki butonları benim belirlediğim parameterlerle oluşturacağım sıyala.
     fileprivate func createButton(image: UIImage, selector: Selector) -> UIButton{
         let button = UIButton(type: .system)
@@ -67,17 +80,6 @@ class UserDetailsViewController: UIViewController, UIScrollViewDelegate {
         
     }
     @objc fileprivate func handleSuperlike(){
-        
-    }
-    
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-
-        view.backgroundColor = .white
-        setUpLayout()
-        setUpBlueVisualEffectView()
-        setUpBottomControls()
         
     }
     
@@ -101,7 +103,6 @@ class UserDetailsViewController: UIViewController, UIScrollViewDelegate {
         view.addSubview(scroolView)
         scroolView.fillSuperview()  // bu, bir extension method ile view un içerisinde konulmuş view un tamamına yayılmasını sağlar.
         scroolView.addSubview(personImageView)
-        personImageView.frame = CGRect(x: 0, y: 20, width: view.frame.width, height: view.frame.width)
         scroolView.addSubview(infoLabel)
         infoLabel.anchor(top: personImageView.bottomAnchor, leading: scroolView.leadingAnchor, bottom: nil, trailing: scroolView.trailingAnchor, padding: .init(top: 16, left: 16, bottom: 0, right: 16))
         scroolView.addSubview(dismissArrow)
@@ -113,6 +114,10 @@ class UserDetailsViewController: UIViewController, UIScrollViewDelegate {
         let changeY = -scrollView.contentOffset.y
         // scrol edince person un photosu büyüsün.
         // frame ile ekrandaki View ların konumunu ve boyutunu ayarlayabiliyorsun güzelce.
+        
+        // bir VC ın sadece view unu imageView uma eşitleyebilirmişim !
+        let personImageView = swipingView.view!
+        
         personImageView.frame = CGRect(x: -changeY, y: -changeY+20, width: view.frame.width + changeY*2, height: view.frame.width + changeY*2)
     }
     
